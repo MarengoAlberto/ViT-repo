@@ -6,7 +6,7 @@ from .model.model import VisionTransformer
 
 
 class ViT(L.LightningModule):
-    def __init__(self, model_kwargs):
+    def __init__(self, model_kwargs, lr):
         super().__init__()
         self.save_hyperparameters()
         self.model = VisionTransformer(**model_kwargs)
@@ -24,7 +24,6 @@ class ViT(L.LightningModule):
         preds = self.model(imgs)
         loss = F.cross_entropy(preds, labels)
         acc = (preds.argmax(dim=-1) == labels).float().mean()
-
         self.log("%s_loss" % mode, loss)
         self.log("%s_acc" % mode, acc)
         return loss

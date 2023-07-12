@@ -8,8 +8,7 @@ from torchvision.datasets import CIFAR10
 import lightning as L
 
 
-def get_loaders(dataset_path, batch_size, num_workers, is_parallel):
-    train_sampler, val_sampler, test_sampler = None, None, None
+def get_datasets(dataset_path):
     test_transform = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -33,13 +32,18 @@ def get_loaders(dataset_path, batch_size, num_workers, is_parallel):
     train_set, _ = torch.utils.data.random_split(train_dataset, [45000, 5000])
     L.seed_everything(42)
     _, val_set = torch.utils.data.random_split(val_dataset, [45000, 5000])
+    # Loading the test set
+    test_set = CIFAR10(root=dataset_path, train=False, transform=test_transform, download=True)
+    return train_set, val_set, test_set
+
+
+def get_loaders(dataset_path, batch_size, num_workers, is_parallel):
+    train_sampler, val_sampler, test_sampler = None, None, None
+    train_set, val_set, test_set = get_datasets(dataset_path)
     if is_parallel:
         train_sampler = None
         val_sampler = None
         test_sampler = None
-    # Loading the test set
-    test_set = CIFAR10(root=dataset_path, train=False, transform=test_transform, download=True)
-
     # We define a set of data loaders that we can use for various purposes later.
     train_loader = data.DataLoader(train_set, batch_size=batch_size, shuffle=train_sampler is None,
                                    sampler=train_sampler, drop_last=True, pin_memory=True, num_workers=num_workers)
@@ -48,3 +52,13 @@ def get_loaders(dataset_path, batch_size, num_workers, is_parallel):
     test_loader = data.DataLoader(test_set, batch_size=batch_size, shuffle=test_sampler is None,
                                   sampler=test_sampler, drop_last=False, num_workers=num_workers)
     return train_loader, val_loader, test_loader
+
+
+def get_trainer(default_root_dir, accelerator, devices, max_epochs, callbacks):
+    return L.Trainer(
+        default_root_dir,
+        accelerator,
+        devices,
+        max_epochs,
+        callbacks,
+    )
