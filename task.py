@@ -1,12 +1,17 @@
 import os
+from multiprocessing import cpu_count
+import torch
 import lightning as L
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from google.cloud import storage
 
 from src.lightning_model import ViT
 from src import utils
 
+# TODO: Fill these out
 DATASET_PATH = ''
 CHECKPOINT_PATH = ''
+STORAGE_BUCKET = ''
 
 
 def train_model(**kwargs):
@@ -37,11 +42,28 @@ def train_model(**kwargs):
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
     result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
 
-    return model, result
+    # Save the trained model locally
+    trainer.save_checkpoint(pretrained_filename)
+
+    if os.path.isfile(pretrained_filename):
+        # Upload the trained model to Cloud storage
+        storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model')
+        blob = storage.blob.Blob.from_string(storage_path, client=storage.Client())
+        blob.upload_from_filename(pretrained_filename)
+        print(f"Saved model files in {model_directory}/{model_filename}")
 
 
 if __name__=="__main__":
-    model, results = train_model(
+    world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
+    num_cpus = cpu_count()
+    num_gpus = torch.cuda.device_count()
+    device = torch.device('cuda') if num_gpus else 'cpu'
+    if device == 'gpu':
+        num_workers = world_size * num_gpus
+    else:
+        num_workers = world_size * num_cpus
+
+    train_model(
         model_kwargs={
             "embed_dim": 256,
             "hidden_dim": 512,
@@ -56,7 +78,7 @@ if __name__=="__main__":
         trainer_kwargs={
             "default_root_dir": os.path.join(CHECKPOINT_PATH, "ViT"),
             "accelerator": "auto",
-            "devices": 1,
+            "devices": num_workers,
             "max_epochs": 180,
             "callbacks": [
                 ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc"),
@@ -66,9 +88,7 @@ if __name__=="__main__":
         loader_kwargs={
             "dataset_path": DATASET_PATH,
             "batch_size": 128,
-            "num_workers": 4,
-            "is_parallel": False
+            "num_workers": num_workers
         },
         lr=3e-4,
     )
-    print("ViT results", results)

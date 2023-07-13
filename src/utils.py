@@ -37,20 +37,13 @@ def get_datasets(dataset_path):
     return train_set, val_set, test_set
 
 
-def get_loaders(dataset_path, batch_size, num_workers, is_parallel):
-    train_sampler, val_sampler, test_sampler = None, None, None
+def get_loaders(dataset_path, batch_size, num_workers):
     train_set, val_set, test_set = get_datasets(dataset_path)
-    if is_parallel:
-        train_sampler = None
-        val_sampler = None
-        test_sampler = None
     # We define a set of data loaders that we can use for various purposes later.
-    train_loader = data.DataLoader(train_set, batch_size=batch_size, shuffle=train_sampler is None,
-                                   sampler=train_sampler, drop_last=True, pin_memory=True, num_workers=num_workers)
-    val_loader = data.DataLoader(val_set, batch_size=batch_size, shuffle=val_sampler is None,
-                                 sampler=val_sampler, drop_last=False, num_workers=num_workers)
-    test_loader = data.DataLoader(test_set, batch_size=batch_size, shuffle=test_sampler is None,
-                                  sampler=test_sampler, drop_last=False, num_workers=num_workers)
+    train_loader = data.DataLoader(train_set, batch_size=batch_size, drop_last=True,
+                                   pin_memory=True, num_workers=num_workers)
+    val_loader = data.DataLoader(val_set, batch_size=batch_size, drop_last=False, num_workers=num_workers)
+    test_loader = data.DataLoader(test_set, batch_size=batch_size, drop_last=False, num_workers=num_workers)
     return train_loader, val_loader, test_loader
 
 

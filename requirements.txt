@@ -7,3 +7,4 @@ torchmetrics>=0.7, <0.12
 torchvision
 pytorch-lightning>=1.4, <2.0.0
 matplotlib
+google-cloud-storage
