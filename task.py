@@ -41,6 +41,7 @@ def train_model(**kwargs):
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
     result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
+    print(result)
 
     # Save the trained model locally
     trainer.save_checkpoint(pretrained_filename)
@@ -50,7 +51,7 @@ def train_model(**kwargs):
         storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model')
         blob = storage.blob.Blob.from_string(storage_path, client=storage.Client())
         blob.upload_from_filename(pretrained_filename)
-        print(f"Saved model files in {model_directory}/{model_filename}")
+        print(f"Saved model files in {storage_path}")
 
 
 if __name__=="__main__":
