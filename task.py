@@ -58,8 +58,7 @@ if __name__=="__main__":
     world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     num_cpus = cpu_count()
     num_gpus = torch.cuda.device_count()
-    device = torch.device('cuda') if num_gpus else 'cpu'
-    if device == 'gpu':
+    if torch.cuda.is_available():
         num_workers = world_size * num_gpus
     else:
         num_workers = world_size * num_cpus
