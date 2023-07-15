@@ -9,7 +9,8 @@ REQUIRED_PACKAGES = [
     'torchvision',
     'pytorch-lightning>=1.4, <2.0.0',
     'google-cloud-storage',
-    'torch-xla'
+    'torch-xla',
+    'python-dotenv'
 ]
 
 setup(
