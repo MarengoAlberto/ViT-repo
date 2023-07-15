@@ -1,23 +1,54 @@
 import os
+from dotenv import load_dotenv
 from multiprocessing import cpu_count
 import torch
 import lightning as L
+from pytorch_lightning.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from google.cloud import storage
 
 from src.lightning_model import ViT
 from src import utils
 
+load_dotenv()
+
+is_local = True if "LOCAL_ENV" in os.environ else False
+if not is_local:
+    from google.cloud import storage
+    import google.cloud.aiplatform as aiplatform
+
+
 # TODO: Fill these out
+PROJECT_ID = ''
+REGION = ''
+BUCKET_URI = ''
 DATASET_PATH = ''
 CHECKPOINT_PATH = ''
 STORAGE_BUCKET = ''
+AIP_TENSORBOARD_LOG_DIR = ''
+TENSORBOARD_NAME = ''
+
+if not is_local:
+    storage_client = storage.Client()
+    aiplatform.init(project=PROJECT_ID, location=REGION, staging_bucket=BUCKET_URI)
+    tensorboard = aiplatform.Tensorboard.create(display_name=TENSORBOARD_NAME, project=PROJECT_ID, location=REGION)
+    TENSORBOARD_RESOURCE_NAME = tensorboard.gca_resource.name
+    print("TensorBoard resource name:", TENSORBOARD_RESOURCE_NAME)
 
 
 def train_model(**kwargs):
+    logger = TensorBoardLogger(AIP_TENSORBOARD_LOG_DIR, name="ViT_model_v0")
+    if not is_local:
+        # Continuous monitoring
+        aiplatform.start_upload_tb_log(
+            tensorboard_id=tensorboard.gca_resource.id,
+            tensorboard_experiment_name="ViT_model_v0",
+            logdir=AIP_TENSORBOARD_LOG_DIR,
+        )
+
     model_kwargs = kwargs.get('model_kwargs')
     loader_kwargs = kwargs.get('loader_kwargs')
     trainer_kwargs = kwargs.get('trainer_kwargs')
+    trainer_kwargs['logger'] = logger
     lr = kwargs.get('lr')
     train_loader, val_loader, test_loader = utils.get_loaders(**loader_kwargs)
     trainer = utils.get_trainer(**trainer_kwargs)
@@ -46,12 +77,14 @@ def train_model(**kwargs):
     # Save the trained model locally
     trainer.save_checkpoint(pretrained_filename)
 
-    if os.path.isfile(pretrained_filename):
+    if not is_local:
         # Upload the trained model to Cloud storage
         storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model')
-        blob = storage.blob.Blob.from_string(storage_path, client=storage.Client())
+        blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
         blob.upload_from_filename(pretrained_filename)
         print(f"Saved model files in {storage_path}")
+
+        aiplatform.end_upload_tb_log()
 
 
 if __name__=="__main__":
