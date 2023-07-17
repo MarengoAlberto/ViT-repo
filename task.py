@@ -24,7 +24,7 @@ BUCKET_URI = ''
 DATASET_PATH = ''
 CHECKPOINT_PATH = ''
 STORAGE_BUCKET = ''
-AIP_TENSORBOARD_LOG_DIR = ''
+AIP_TENSORBOARD_LOG_DIR = "tb_logs"
 TENSORBOARD_NAME = ''
 
 if not is_local:
@@ -93,9 +93,10 @@ if __name__=="__main__":
     num_gpus = torch.cuda.device_count()
     if torch.cuda.is_available():
         num_workers = world_size * num_gpus
+        strategy = "ddp"
     else:
         num_workers = world_size * num_cpus
-
+        strategy = "auto"
     train_model(
         model_kwargs={
             "embed_dim": 256,
@@ -111,6 +112,7 @@ if __name__=="__main__":
         trainer_kwargs={
             "default_root_dir": os.path.join(CHECKPOINT_PATH, "ViT"),
             "accelerator": "auto",
+            "strategy": strategy,
             "devices": num_workers,
             "max_epochs": 180,
             "callbacks": [
