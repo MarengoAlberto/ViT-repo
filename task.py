@@ -76,12 +76,14 @@ def train_model(**kwargs):
 
     # Save the trained model locally
     trainer.save_checkpoint(pretrained_filename)
+    model_filepath = os.path.join(CHECKPOINT_PATH, 'Vit.pt')
+    torch.save(model.state_dict(), model_filepath)
 
     if not is_local:
         # Upload the trained model to Cloud storage
         storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model')
         blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
-        blob.upload_from_filename(pretrained_filename)
+        blob.upload_from_filename(model_filepath)
         print(f"Saved model files in {storage_path}")
 
         aiplatform.end_upload_tb_log()

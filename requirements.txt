@@ -10,3 +10,4 @@ pytorch-lightning>=1.4, <2.0.0
 matplotlib
 google-cloud-storage
 tensorboard
+torchserve
