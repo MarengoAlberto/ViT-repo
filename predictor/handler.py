@@ -1,6 +1,4 @@
 import os
-import sys
-import json
 import logging
 
 import torch
@@ -8,7 +6,6 @@ from ts.torch_handler.base_handler import BaseHandler
 
 logger = logging.getLogger(__name__)
 
-sys.path.append(".")
 
 from src.model.model import VisionTransformer
 

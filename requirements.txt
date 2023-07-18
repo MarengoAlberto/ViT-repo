@@ -11,3 +11,4 @@ matplotlib
 google-cloud-storage
 tensorboard
 torchserve
+torch-model-archiver
