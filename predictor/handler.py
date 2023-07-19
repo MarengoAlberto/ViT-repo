@@ -1,13 +1,45 @@
 import os
 import logging
-
 import torch
+from torchvision.io import read_image
+import torchvision.transforms as T
 from ts.torch_handler.base_handler import BaseHandler
 
-logger = logging.getLogger(__name__)
-
-
 from src.model.model import VisionTransformer
+
+logger = logging.getLogger(__name__)
+transforms = T.Resize(size=(32, 32))
+
+VALID_IMAGE_FORMATS = [".jpg", ".gif", ".png", ".tga", ".jpeg"]
+
+CLASS_MAPPING = {
+                0: 'airplane',
+                1: 'automobile',
+                2: 'bird',
+                3: 'cat',
+                4: 'deer',
+                5: 'dog',
+                6: 'frog',
+                7: 'horse',
+                8: 'ship',
+                9: 'truck'
+}
+
+
+def get_batch(path):
+    imgs = []
+    for filename in os.listdir(path):
+        ext = os.path.splitext(filename)[1]
+        if ext.lower() not in VALID_IMAGE_FORMATS:
+            continue
+        imgs.append(os.path.join(path, filename))
+    batch = []
+    for image in imgs:
+        X = read_image(image)
+        X = transforms(X)
+        batch.append(X)
+    batch = torch.stack(batch, 0)
+    return batch
 
 
 class TransformersClassifierHandler(BaseHandler):
@@ -48,7 +80,12 @@ class TransformersClassifierHandler(BaseHandler):
         """ Preprocessing input request by tokenizing
             Extend with your own preprocessing steps as needed
         """
-        pass
+        path = data[0].get("data")
+        if path is None:
+            path = data[0].get("body")
+        logger.info("Received path: '%s'", path)
+        inputs = get_batch(path)
+        return inputs
 
     def inference(self, inputs):
         """ Predict the class of a text using a trained transformer model.
@@ -59,4 +96,4 @@ class TransformersClassifierHandler(BaseHandler):
         return [prediction]
 
     def postprocess(self, inference_output):
-        return inference_output
+        return CLASS_MAPPING[inference_output]
