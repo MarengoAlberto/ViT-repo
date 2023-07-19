@@ -9,6 +9,7 @@ from src.model.model import VisionTransformer
 
 logger = logging.getLogger(__name__)
 transforms = T.Resize(size=(32, 32))
+softmax = torch.nn.Softmax(dim=-1)
 
 VALID_IMAGE_FORMATS = [".jpg", ".gif", ".png", ".tga", ".jpeg"]
 
@@ -34,6 +35,7 @@ def get_batch(path):
             continue
         imgs.append(os.path.join(path, filename))
     batch = []
+    logger.info("Processing images: '%s'", imgs)
     for image in imgs:
         X = read_image(image)
         X = transforms(X)
@@ -90,10 +92,10 @@ class TransformersClassifierHandler(BaseHandler):
     def inference(self, inputs):
         """ Predict the class of a text using a trained transformer model.
         """
-        prediction = self.model(inputs.to(self.device)).argmax().item()
-
-        logger.info("Model predicted: '%s'", prediction)
-        return [prediction]
+        outputs = self.model(inputs.to(self.device))
+        predictions = softmax(outputs).argmax(dim=-1).tolist()
+        logger.info("Model predicted: '%s'", predictions)
+        return predictions
 
     def postprocess(self, inference_output):
-        return CLASS_MAPPING[inference_output]
+        return [CLASS_MAPPING[prediction] for prediction in inference_output]
