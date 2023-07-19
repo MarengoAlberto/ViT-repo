@@ -56,4 +56,5 @@ def get_trainer(default_root_dir, logger, accelerator, strategy, devices, max_ep
         devices=devices,
         max_epochs=max_epochs,
         callbacks=callbacks,
+        enable_checkpointing=True,
     )

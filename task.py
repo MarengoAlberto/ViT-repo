@@ -21,8 +21,8 @@ if not is_local:
 PROJECT_ID = ''
 REGION = ''
 BUCKET_URI = ''
-DATASET_PATH = ''
-CHECKPOINT_PATH = ''
+DATASET_PATH = os.environ.get("PATH_DATASETS", "data/")
+CHECKPOINT_PATH = os.environ.get("PATH_CHECKPOINT", "saved_models/VisionTransformers/")
 STORAGE_BUCKET = ''
 AIP_TENSORBOARD_LOG_DIR = "tb_logs"
 TENSORBOARD_NAME = ''
@@ -75,7 +75,7 @@ def train_model(**kwargs):
     print(result)
 
     # Save the trained model locally
-    trainer.save_checkpoint(pretrained_filename)
+    # trainer.save_checkpoint(pretrained_filename)
     model_filepath = os.path.join(CHECKPOINT_PATH, 'ViT.pt')
     torch.save(model.state_dict(), model_filepath)
 
@@ -90,6 +90,10 @@ def train_model(**kwargs):
 
 
 if __name__=="__main__":
+
+    isExist = os.path.exists(CHECKPOINT_PATH)
+    if not isExist:
+        os.makedirs(CHECKPOINT_PATH)
     world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
     num_cpus = cpu_count()
     num_gpus = torch.cuda.device_count()
@@ -118,7 +122,8 @@ if __name__=="__main__":
             "devices": num_workers,
             "max_epochs": 180,
             "callbacks": [
-                ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc"),
+                ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc",
+                                dirpath=os.path.join(CHECKPOINT_PATH, "ViT")),
                 LearningRateMonitor("epoch"),
             ],
         },

@@ -10,6 +10,7 @@ class ViT(L.LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.model = VisionTransformer(**model_kwargs)
+        # self.example_input_array = next(iter(train_loader))[0]
 
     def forward(self, x):
         return self.model(x)
