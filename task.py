@@ -81,7 +81,7 @@ def train_model(**kwargs):
 
     if not is_local:
         # Upload the trained model to Cloud storage
-        storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model')
+        storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model.pt')
         blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
         blob.upload_from_filename(model_filepath)
         print(f"Saved model files in {storage_path}")
