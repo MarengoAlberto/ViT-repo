@@ -40,8 +40,8 @@ def train_model(**kwargs):
     if not is_local:
         # Continuous monitoring
         aiplatform.start_upload_tb_log(
-            tensorboard_id=tensorboard.gca_resource.id,
-            tensorboard_experiment_name="ViT_model_v0",
+            tensorboard_id=tensorboard.gca_resource.name.split('/')[-1],
+            tensorboard_experiment_name="vit-model-v0",
             logdir=AIP_TENSORBOARD_LOG_DIR,
         )
 
