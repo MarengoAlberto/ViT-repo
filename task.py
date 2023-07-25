@@ -17,15 +17,14 @@ if not is_local:
     import google.cloud.aiplatform as aiplatform
 
 
-# TODO: Fill these out
-PROJECT_ID = ''
-REGION = ''
-BUCKET_URI = ''
+PROJECT_ID = 'alberto-playground'
+REGION = 'us-central1'
+BUCKET_URI = 'alberto-vit-playground'
 DATASET_PATH = os.environ.get("PATH_DATASETS", "data/")
 CHECKPOINT_PATH = os.environ.get("PATH_CHECKPOINT", "saved_models/VisionTransformers/")
-STORAGE_BUCKET = ''
-AIP_TENSORBOARD_LOG_DIR = "tb_logs"
-TENSORBOARD_NAME = ''
+STORAGE_BUCKET = 'gs://alberto-vit-playground/outputs'
+AIP_TENSORBOARD_LOG_DIR = "gs://alberto-vit-playground/outputs/tb"
+TENSORBOARD_NAME = 'tb-ViT'
 
 if not is_local:
     storage_client = storage.Client()
