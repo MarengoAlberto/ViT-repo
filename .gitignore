@@ -1,8 +1,12 @@
 *.gz
 *.ckpt
+*.mar
 cifar-10-batches-py/
 tb_logs/
 saved_models/
+serve/
+samples/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

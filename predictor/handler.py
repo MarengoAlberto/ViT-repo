@@ -1,17 +1,29 @@
 import os
-import logging
+# import logging
 import torch
 from torchvision.io import read_image
 import torchvision.transforms as T
 from ts.torch_handler.base_handler import BaseHandler
 
-from src.model.model import VisionTransformer
+from model import VisionTransformer
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 transforms = T.Resize(size=(32, 32))
 softmax = torch.nn.Softmax(dim=-1)
 
 VALID_IMAGE_FORMATS = [".jpg", ".gif", ".png", ".tga", ".jpeg"]
+
+model_kwargs={
+            "embed_dim": 256,
+            "hidden_dim": 512,
+            "num_heads": 8,
+            "num_layers": 6,
+            "patch_size": 4,
+            "num_channels": 3,
+            "num_patches": 64,
+            "num_classes": 10,
+            "dropout": 0.2,
+        }
 
 CLASS_MAPPING = {
                 0: 'airplane',
@@ -35,7 +47,7 @@ def get_batch(path):
             continue
         imgs.append(os.path.join(path, filename))
     batch = []
-    logger.info("Processing images: '%s'", imgs)
+    # logger.info("Processing images: '%s'", imgs)
     for image in imgs:
         X = read_image(image)
         X = transforms(X)
@@ -61,6 +73,10 @@ class TransformersClassifierHandler(BaseHandler):
         self.manifest = ctx.manifest
 
         properties = ctx.system_properties
+
+        # logger.info(f'Properties: {properties}')
+        # logger.info(f'Manifest: {self.manifest}')
+
         model_dir = properties.get("model_dir")
         self.device = torch.device("cuda:" + str(properties.get("gpu_id")) if torch.cuda.is_available() else "cpu")
 
@@ -71,10 +87,12 @@ class TransformersClassifierHandler(BaseHandler):
             raise RuntimeError("Missing the model.pt or pytorch_model.bin file")
 
         # Load model
-        self.model = VisionTransformer.load_state_dict(torch.load(model_pt_path))
+        # self.model = torch.jit.load(model_pt_path)
+        self.model = VisionTransformer(**model_kwargs)
+        self.model.load_state_dict(torch.load(model_pt_path))
         self.model.to(self.device)
         self.model.eval()
-        logger.debug('Transformer model from path {0} loaded successfully'.format(model_dir))
+        # logger.debug('Transformer model from path {0} loaded successfully'.format(model_dir))
 
         self.initialized = True
 
@@ -85,7 +103,7 @@ class TransformersClassifierHandler(BaseHandler):
         path = data[0].get("data")
         if path is None:
             path = data[0].get("body")
-        logger.info("Received path: '%s'", path)
+        # logger.info("Received path: '%s'", path)
         inputs = get_batch(path)
         return inputs
 
@@ -94,7 +112,7 @@ class TransformersClassifierHandler(BaseHandler):
         """
         outputs = self.model(inputs.to(self.device))
         predictions = softmax(outputs).argmax(dim=-1).tolist()
-        logger.info("Model predicted: '%s'", predictions)
+        # logger.info("Model predicted: '%s'", predictions)
         return predictions
 
     def postprocess(self, inference_output):

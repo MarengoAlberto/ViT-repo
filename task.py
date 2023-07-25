@@ -77,7 +77,7 @@ def train_model(**kwargs):
     # Save the trained model locally
     # trainer.save_checkpoint(pretrained_filename)
     model_filepath = os.path.join(CHECKPOINT_PATH, 'ViT.pt')
-    torch.save(model.state_dict(), model_filepath)
+    torch.save(model.model.state_dict(), model_filepath)
 
     if not is_local:
         # Upload the trained model to Cloud storage
