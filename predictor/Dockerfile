@@ -12,10 +12,14 @@ USER model-server
 # install dependencies
 RUN python3 -m pip install --upgrade pip
 
-COPY .src/ /home/model-server/src/
+# COPY src /home/model-server/src
+COPY serve/model-store/ViT-model.mar /home/model-server/model-store/
 
 ARG MODEL_NAME=ViT-model
 ENV MODEL_NAME="${MODEL_NAME}"
+
+ARG MAR_URI=gs://alberto-playground/serve
+ENV MAR_URI="${AIP_STORAGE_URI}"
 
 # health and prediction listener ports
 ARG AIP_HTTP_PORT=7080
@@ -34,4 +38,4 @@ RUN echo "service_envelope=json\n"     "inference_address=http://0.0.0.0:${AIP_H
 USER model-server
 
 # run Torchserve HTTP serve to respond to prediction requests
-CMD ["echo", "AIP_STORAGE_URI=${AIP_STORAGE_URI}", ";",     "gsutil", "cp", "-r", "${AIP_STORAGE_URI}/${MODEL_NAME}.mar", "/home/model-server/model-store/", ";",     "ls", "-ltr", "/home/model-server/model-store/", ";",     "torchserve", "--start", "--ts-config=/home/model-server/config.properties",     "--models", "${MODEL_NAME}=${MODEL_NAME}.mar",     "--model-store", "/home/model-server/model-store"]
+CMD ["echo", "MAR_URI=${MAR_URI}", ";",    "ls", "-ltr", "/home/model-server/model-store/", ";",     "torchserve", "--start", "--ts-config=/home/model-server/config.properties",     "--models", "${MODEL_NAME}=${MODEL_NAME}.mar",     "--model-store", "/home/model-server/model-store"]
