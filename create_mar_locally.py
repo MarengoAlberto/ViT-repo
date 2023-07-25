@@ -8,7 +8,6 @@ from pathlib import Path
 
 logging.getLogger().setLevel(logging.INFO)
 
-APP_NAME = 'vit'
 MODEL_PT_FILEPATH = 'saved_models/VisionTransformers'
 MAR_MODEL_OUT_PATH = 'serve'
 MODEL_FILE_PATH = 'predictor'
