@@ -16,7 +16,7 @@ MODEL_DISPLAY_NAME = 'ViT-model'
 model_version = 1
 PROJECT_ID = 'alberto-playground'
 BUCKET_NAME = 'alberto-vit-playground'
-CUSTOM_PREDICTOR_IMAGE_URI = f"gcr.io/{PROJECT_ID}/pytorch_predict_{APP_NAME}"
+CUSTOM_PREDICTOR_IMAGE_URI = f"gcr.io/{PROJECT_ID}/pytorch_predict_vit"
 
 # create directory to save model archive file
 model_output_root = MODEL_PT_FILEPATH

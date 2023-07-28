@@ -1,5 +1,9 @@
 import os
 import logging
+import base64
+from io import BytesIO
+from PIL import Image
+import json
 import torch
 from torchvision.io import read_image
 import torchvision.transforms as T
@@ -11,8 +15,7 @@ logger = logging.getLogger('__main__')
 transforms = T.Resize(size=(32, 32))
 softmax = torch.nn.Softmax(dim=-1)
 
-VALID_IMAGE_FORMATS = [".jpg", ".gif", ".png", ".tga", ".jpeg"]
-
+TEMP_FILE_NAME = '/tmp/image.png'
 model_kwargs={
             "embed_dim": 256,
             "hidden_dim": 512,
@@ -39,22 +42,20 @@ CLASS_MAPPING = {
 }
 
 
-def get_batch(path):
-    imgs = []
-    for filename in os.listdir(path):
-        ext = os.path.splitext(filename)[1]
-        if ext.lower() not in VALID_IMAGE_FORMATS:
-            continue
-        imgs.append(os.path.join(path, filename))
-    batch = []
-    logger.info("Processing images: '%s'", imgs)
-    for image in imgs:
-        X = read_image(image)
-        X = transforms(X)
-        batch.append(X)
-    batch = torch.stack(batch, 0)
-    logger.info(f"Tensor shape: {batch.shape}")
-    return batch
+def get_input(file):
+    if isinstance(file, dict):
+        logger.info(file.keys())
+        im = Image.open(BytesIO(base64.b64decode(file['content'])))
+        im.save(TEMP_FILE_NAME)
+    else:
+        image = Image.open(BytesIO(file))
+        image.save(TEMP_FILE_NAME)
+    input = read_image(TEMP_FILE_NAME)
+    input = transforms(input)
+    input= torch.unsqueeze(input, 0)
+    logger.info(f"Tensor shape: {input.shape}")
+    os.remove(TEMP_FILE_NAME)
+    return input
 
 
 class TransformersClassifierHandler(BaseHandler):
@@ -100,17 +101,22 @@ class TransformersClassifierHandler(BaseHandler):
         path = data[0].get("data")
         if path is None:
             path = data[0].get("body")
-        logger.info("Received path: '%s'", path)
-        inputs = get_batch(path['input'])
+        if path is None:
+            file = data[0].get('file')
+        else:
+            file = path['file']
+        inputs = get_input(file)
         return inputs.type(torch.float32)
 
     def inference(self, inputs):
         """ Predict the class of a text using a trained transformer model.
         """
         outputs = self.model(inputs.to(self.device))
-        predictions = softmax(outputs).argmax(dim=-1).tolist()
-        logger.info("Model predicted: '%s'", predictions)
-        return predictions
+        return outputs
 
     def postprocess(self, inference_output):
-        return [{'response': [CLASS_MAPPING[prediction] for prediction in inference_output]}]
+        proba = softmax(inference_output)
+        prediction = proba.argmax(dim=-1).item()
+        proba_ret = {v: proba[:, int(k)].item() for k, v in CLASS_MAPPING.items()}
+        return [{'response': CLASS_MAPPING[prediction],
+                 'probabilities': proba_ret}]
