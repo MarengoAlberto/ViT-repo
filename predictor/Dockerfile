@@ -11,9 +11,13 @@ USER model-server
 
 # install dependencies
 RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install google-cloud-storage
 
 # COPY src /home/model-server/src
 COPY serve/model-store/ViT-model.mar /home/model-server/model-store/
+COPY token/alberto-playground-bc631f2fcabd.json /home/model-server/
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=/home/model-server/alberto-playground-bc631f2fcabd.json
 
 ARG MODEL_NAME=ViT-model
 ENV MODEL_NAME="${MODEL_NAME}"

@@ -1,6 +1,7 @@
 *.gz
 *.ckpt
 *.mar
+*.json
 cifar-10-batches-py/
 tb_logs/
 saved_models/

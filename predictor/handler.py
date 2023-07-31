@@ -9,12 +9,16 @@ from torchvision.io import read_image
 import torchvision.transforms as T
 from ts.torch_handler.base_handler import BaseHandler
 
+from google.cloud import storage
+
 from model import VisionTransformer
 
 logger = logging.getLogger('__main__')
 transforms = T.Resize(size=(32, 32))
 softmax = torch.nn.Softmax(dim=-1)
 
+PROJECT_ID = 'alberto-playground'
+BUCKET_NAME = 'alberto-vit-playground'
 TEMP_FILE_NAME = '/tmp/image.png'
 model_kwargs={
             "embed_dim": 256,
@@ -41,6 +45,8 @@ CLASS_MAPPING = {
                 9: 'truck'
 }
 
+client = storage.Client(project=PROJECT_ID)
+bucket = storage.Client().bucket(BUCKET_NAME)
 
 def get_input(file):
     if isinstance(file, dict):
@@ -98,13 +104,25 @@ class TransformersClassifierHandler(BaseHandler):
         """ Preprocessing input request by tokenizing
             Extend with your own preprocessing steps as needed
         """
-        path = data[0].get("data")
-        if path is None:
-            path = data[0].get("body")
-        if path is None:
-            file = data[0].get('file')
+        if isinstance(data, list):
+            path = data[0].get("data")
+            if path is None:
+                path = data[0].get("body")
+            if path is None:
+                root = data[0]
+            else:
+                root = path
+            file = root.get("file")
+            if file is None:
+                link = root.get("link")
+                if isinstance(link, str) and link.startswith('gs://'):
+                    sub_folder = os.path.relpath(link.replace('gs://', ''), BUCKET_NAME)
+                    blob = bucket.get_blob(sub_folder)    
+                    file = blob.download_as_bytes()
+                else:
+                    raise ValueError()
         else:
-            file = path['file']
+            file = data
         inputs = get_input(file)
         return inputs.type(torch.float32)
 
