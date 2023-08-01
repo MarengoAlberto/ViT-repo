@@ -9,11 +9,16 @@ from torchvision.io import read_image
 import torchvision.transforms as T
 from ts.torch_handler.base_handler import BaseHandler
 
-from google.cloud import storage
+logger = logging.getLogger('__main__')
+
+try:
+    from google.cloud import storage
+except:
+    logger.warning('No GCS loaded, only local prediction available')
 
 from model import VisionTransformer
 
-logger = logging.getLogger('__main__')
+
 transforms = T.Resize(size=(32, 32))
 softmax = torch.nn.Softmax(dim=-1)
 
@@ -45,8 +50,11 @@ CLASS_MAPPING = {
                 9: 'truck'
 }
 
-client = storage.Client(project=PROJECT_ID)
-bucket = storage.Client().bucket(BUCKET_NAME)
+try:
+    client = storage.Client(project=PROJECT_ID)
+    bucket = storage.Client().bucket(BUCKET_NAME)
+except:
+    logger.warning('No GCS loaded, only local prediction available')
 
 def get_input(file):
     if isinstance(file, dict):
