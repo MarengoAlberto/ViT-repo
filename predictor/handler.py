@@ -56,6 +56,7 @@ try:
 except:
     logger.warning('No GCS loaded, only local prediction available')
 
+
 def get_input(file):
     if isinstance(file, dict):
         logger.info(file.keys())

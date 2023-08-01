@@ -6,8 +6,8 @@ import lightning as L
 from pytorch_lightning.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
-from src.lightning_model import ViT
-from src import utils
+from .src.lightning_model import ViT
+from .src import utils
 
 load_dotenv()
 
@@ -23,15 +23,17 @@ BUCKET_URI = 'alberto-vit-playground'
 DATASET_PATH = os.environ.get("PATH_DATASETS", "data/")
 CHECKPOINT_PATH = os.environ.get("PATH_CHECKPOINT", "saved_models/VisionTransformers/")
 STORAGE_BUCKET = 'gs://alberto-vit-playground/outputs'
-AIP_TENSORBOARD_LOG_DIR = "gs://alberto-vit-playground/outputs/tb"
 TENSORBOARD_NAME = 'tb-ViT'
 
 if not is_local:
+    AIP_TENSORBOARD_LOG_DIR = "gs://alberto-vit-playground/outputs/tb"
     storage_client = storage.Client()
     aiplatform.init(project=PROJECT_ID, location=REGION, staging_bucket=BUCKET_URI)
     tensorboard = aiplatform.Tensorboard.create(display_name=TENSORBOARD_NAME, project=PROJECT_ID, location=REGION)
     TENSORBOARD_RESOURCE_NAME = tensorboard.gca_resource.name
     print("TensorBoard resource name:", TENSORBOARD_RESOURCE_NAME)
+else:
+    AIP_TENSORBOARD_LOG_DIR = "tb_logs"
 
 
 def train_model(**kwargs):
