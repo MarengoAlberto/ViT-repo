@@ -21,7 +21,6 @@ L.seed_everything(42)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
 num_cpus = cpu_count()
 num_gpus = torch.cuda.device_count()
 device = torch.device('cuda') if num_gpus else 'cpu'
@@ -36,8 +35,6 @@ if torch.cuda.is_available():
 else:
     trainer_num_workers = "auto"
     dataloader_num_workers = num_cpus
-
-accelerator = 'auto'
 
 # Check whether the specified path exists or not
 isExist = os.path.exists(CHECKPOINT_PATH)
@@ -59,7 +56,7 @@ args = {'model_kwargs': {
 },
 'trainer_kwargs':{
     "default_root_dir": os.path.join(CHECKPOINT_PATH, "ViT"),
-    "accelerator": accelerator,
+    "accelerator": "auto",
     "strategy": "auto",
     "devices": trainer_num_workers,
     "max_epochs": 25,

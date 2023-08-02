@@ -91,7 +91,6 @@ def train_model(**kwargs):
 
 
 if __name__=="__main__":
-
     isExist = os.path.exists(CHECKPOINT_PATH)
     if not isExist:
         os.makedirs(CHECKPOINT_PATH)
