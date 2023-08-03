@@ -1,8 +1,7 @@
 import torch
-import torch.nn as nn
+import os
+import json
 import torch.utils.data as data
-import torchvision
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 import lightning as L
@@ -58,3 +57,9 @@ def get_trainer(default_root_dir, logger, accelerator, strategy, devices, max_ep
         callbacks=callbacks,
         enable_checkpointing=True,
     )
+
+
+def get_n_tpus():
+    tf_config_str = os.environ.get('TF_CONFIG')
+    tf_config_dict = json.loads(tf_config_str)
+    return int(tf_config_dict['job']['worker_config']['accelerator_config']['count'])

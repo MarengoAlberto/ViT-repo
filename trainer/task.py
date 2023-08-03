@@ -95,14 +95,21 @@ if __name__=="__main__":
     if not isExist:
         os.makedirs(CHECKPOINT_PATH)
     world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
-    num_cpus = cpu_count()
-    num_gpus = torch.cuda.device_count()
-    if torch.cuda.is_available():
-        num_workers = world_size * num_gpus
-        strategy = "ddp"
-    else:
-        num_workers = world_size * num_cpus
+    tpu = True if "XRT_TPU_CONFIG" in os.environ else False
+    if tpu:
+        accelerator = "tpu"
         strategy = "auto"
+        num_workers = world_size * utils.get_n_tpus()
+    else:
+        accelerator = "auto"
+        num_cpus = cpu_count()
+        num_gpus = torch.cuda.device_count()
+        if torch.cuda.is_available():
+            num_workers = world_size * num_gpus
+            strategy = "ddp"
+        else:
+            num_workers = world_size * num_cpus
+            strategy = "auto"
     train_model(
         model_kwargs={
             "embed_dim": 256,
@@ -117,7 +124,7 @@ if __name__=="__main__":
         },
         trainer_kwargs={
             "default_root_dir": os.path.join(CHECKPOINT_PATH, "ViT"),
-            "accelerator": "auto",
+            "accelerator": accelerator,
             "strategy": strategy,
             "devices": num_workers,
             "max_epochs": 180,
