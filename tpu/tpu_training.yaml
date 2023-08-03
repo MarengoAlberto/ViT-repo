@@ -1,0 +1,12 @@
+jobId: tpu_training
+scaleTier: CUSTOM
+masterType: n1-highcpu-16
+masterConfig:
+imageUri: gcr.io/alberto-playground/pytorch_tpu_training:vit_pytorch_tpu
+workerType: cloud_tpu
+workerCount: 1
+workerConfig:
+acceleratorConfig:
+type: TPU_V3
+count: 8
+tpuTfVersion: "1.15"
