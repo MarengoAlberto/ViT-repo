@@ -113,25 +113,23 @@ class TransformersClassifierHandler(BaseHandler):
         """ Preprocessing input request by tokenizing
             Extend with your own preprocessing steps as needed
         """
-        if isinstance(data, list):
-            path = data[0].get("data")
-            if path is None:
-                path = data[0].get("body")
-            if path is None:
-                root = data[0]
-            else:
-                root = path
-            file = root.get("file")
-            if file is None:
-                link = root.get("link")
-                if isinstance(link, str) and link.startswith('gs://'):
-                    sub_folder = os.path.relpath(link.replace('gs://', ''), BUCKET_NAME)
-                    blob = bucket.get_blob(sub_folder)    
-                    file = blob.download_as_bytes()
-                else:
-                    raise ValueError()
+        logger.info(data)
+        path = data[0].get("data")
+        if path is None:
+            path = data[0].get("body")
+        if path is None:
+            root = data[0]
         else:
-            file = data
+            root = path
+        file = root.get("file")
+        if file is None:
+            link = root.get("link")
+            if isinstance(link, str) and link.startswith('gs://'):
+                sub_folder = os.path.relpath(link.replace('gs://', ''), BUCKET_NAME)
+                blob = bucket.get_blob(sub_folder)
+                file = blob.download_as_bytes()
+            else:
+                raise ValueError()
         inputs = get_input(file)
         return inputs.type(torch.float32)
 
