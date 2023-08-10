@@ -24,6 +24,8 @@ print(f"python_module_name={python_module_name}")
 
 print(f"JOB_NAME={JOB_NAME}")
 
+aiplatform.init(project=PROJECT_ID, location=REGION, staging_bucket=BUCKET_URI)
+
 job = aiplatform.CustomPythonPackageTrainingJob(
     display_name=f"{JOB_NAME}",
     python_package_gcs_uri=PYTHON_PACKAGE_GCS_URI,
