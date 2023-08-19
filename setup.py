@@ -10,7 +10,8 @@ REQUIRED_PACKAGES = [
     'pytorch-lightning>=1.4, <2.0.0',
     'google-cloud-storage',
     'torch-xla',
-    'python-dotenv'
+    'python-dotenv',
+    'websockets'
 ]
 
 setup(
