@@ -11,7 +11,10 @@ REQUIRED_PACKAGES = [
     'google-cloud-storage',
     'torch-xla',
     'python-dotenv',
-    'websockets'
+    'websocket-client',
+    'python-json-logger',
+    'tensorboard',
+    'tensorflow'
 ]
 
 setup(

@@ -105,10 +105,13 @@ if __name__=="__main__":
         num_cpus = cpu_count()
         num_gpus = torch.cuda.device_count()
         if torch.cuda.is_available():
-            num_workers = world_size * num_gpus
+            accelerator = "gpu"
+            num_workers = num_gpus
+            num_dataloader_workers = world_size * num_gpus
+            num_nodes = world_size
             strategy = "ddp"
         else:
-            num_workers = world_size * num_cpus
+            num_workers = num_cpus
             strategy = "auto"
     train_model(
         model_kwargs={
@@ -127,6 +130,7 @@ if __name__=="__main__":
             "accelerator": accelerator,
             "strategy": strategy,
             "devices": num_workers,
+            "num_nodes": num_nodes,
             "max_epochs": 180,
             "callbacks": [
                 ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc",
@@ -137,7 +141,7 @@ if __name__=="__main__":
         loader_kwargs={
             "dataset_path": DATASET_PATH,
             "batch_size": 128,
-            "num_workers": num_workers
+            "num_workers": num_dataloader_workers
         },
         lr=3e-4,
     )

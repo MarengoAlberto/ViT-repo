@@ -46,13 +46,14 @@ def get_loaders(dataset_path, batch_size, num_workers):
     return train_loader, val_loader, test_loader
 
 
-def get_trainer(default_root_dir, logger, accelerator, strategy, devices, max_epochs, callbacks):
+def get_trainer(default_root_dir, logger, accelerator, strategy, devices, num_nodes, max_epochs, callbacks):
     return L.Trainer(
         default_root_dir=default_root_dir,
         logger=logger,
         accelerator=accelerator,
         strategy=strategy,
         devices=devices,
+        num_nodes=num_nodes,
         max_epochs=max_epochs,
         callbacks=callbacks,
         enable_checkpointing=True,
