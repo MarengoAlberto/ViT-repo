@@ -34,7 +34,7 @@ job = aiplatform.CustomPythonPackageTrainingJob(
 )
 
 # Training cluster worker pool configuration
-REPLICA_COUNT = 2
+REPLICA_COUNT = 3
 MACHINE_TYPE = "n1-standard-32"
 ACCELERATOR_TYPE = "NVIDIA_TESLA_P100"
 ACCELERATOR_COUNT = 2
@@ -50,9 +50,9 @@ model = job.run(
     machine_type=MACHINE_TYPE,
     accelerator_type=ACCELERATOR_TYPE,
     accelerator_count=ACCELERATOR_COUNT,
-    reduction_server_replica_count=REDUCTION_SERVER_COUNT,
-    reduction_server_machine_type=REDUCTION_SERVER_MACHINE_TYPE,
-    reduction_server_container_uri=REDUCTION_SERVER_IMAGE_URI,
+    # reduction_server_replica_count=REDUCTION_SERVER_COUNT,
+    # reduction_server_machine_type=REDUCTION_SERVER_MACHINE_TYPE,
+    # reduction_server_container_uri=REDUCTION_SERVER_IMAGE_URI,
     environment_variables=ENVIRONMENT_VARIABLES,
     service_account=os.environ['SERVICE_ACCOUNT'],
     sync=True,

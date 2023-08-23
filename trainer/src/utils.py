@@ -5,6 +5,7 @@ import torch.utils.data as data
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 import lightning as L
+from lightning.pytorch.plugins.environments import KubeflowEnvironment
 
 
 def get_datasets(dataset_path):
@@ -57,6 +58,7 @@ def get_trainer(default_root_dir, logger, accelerator, strategy, devices, num_no
         max_epochs=max_epochs,
         callbacks=callbacks,
         enable_checkpointing=True,
+        plugins=KubeflowEnvironment(),
     )
 
 

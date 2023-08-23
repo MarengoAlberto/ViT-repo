@@ -1,4 +1,5 @@
 import os
+import logging
 from dotenv import load_dotenv
 from multiprocessing import cpu_count
 import torch
@@ -16,6 +17,7 @@ if not is_local:
     from google.cloud import storage
     import google.cloud.aiplatform as aiplatform
 
+logger = logging.getLogger(__name__)
 
 PROJECT_ID = 'alberto-playground'
 REGION = 'us-central1'
@@ -37,7 +39,7 @@ else:
 
 
 def train_model(**kwargs):
-    logger = TensorBoardLogger(AIP_TENSORBOARD_LOG_DIR, name="ViT_model_v0")
+    logger = TensorBoardLogger(AIP_TENSORBOARD_LOG_DIR, name="vit-model-v0")
     if not is_local:
         # Continuous monitoring
         aiplatform.start_upload_tb_log(
@@ -113,6 +115,12 @@ if __name__=="__main__":
         else:
             num_workers = num_cpus
             strategy = "auto"
+    logger.info('__________')
+    logger.info(world_size)
+    logger.info(accelerator)
+    logger.info(num_workers)
+    logger.info(strategy)
+    logger.info('__________')
     train_model(
         model_kwargs={
             "embed_dim": 256,
