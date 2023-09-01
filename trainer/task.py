@@ -26,9 +26,10 @@ DATASET_PATH = os.environ.get("PATH_DATASETS", "data/")
 CHECKPOINT_PATH = os.environ.get("PATH_CHECKPOINT", "saved_models/VisionTransformers/")
 STORAGE_BUCKET = 'gs://alberto-vit-playground/outputs'
 TENSORBOARD_NAME = 'tb-ViT'
+EXPERIMENT_NAME = 'vit-model-v0'
 
 if not is_local:
-    AIP_TENSORBOARD_LOG_DIR = "gs://alberto-vit-playground/outputs/tb"
+    AIP_TENSORBOARD_LOG_DIR = f"{STORAGE_BUCKET}/tb/{EXPERIMENT_NAME}"
     storage_client = storage.Client()
     aiplatform.init(project=PROJECT_ID, location=REGION, staging_bucket=BUCKET_URI)
     tensorboard = aiplatform.Tensorboard.create(display_name=TENSORBOARD_NAME, project=PROJECT_ID, location=REGION)
@@ -39,15 +40,15 @@ else:
 
 
 def train_model(**kwargs):
-    logger = TensorBoardLogger(AIP_TENSORBOARD_LOG_DIR, name="vit-model-v0")
+    logger = TensorBoardLogger(AIP_TENSORBOARD_LOG_DIR, name=EXPERIMENT_NAME)
     if not is_local:
         # Continuous monitoring
         aiplatform.start_upload_tb_log(
             tensorboard_id=tensorboard.gca_resource.name.split('/')[-1],
-            tensorboard_experiment_name="vit-model-v0",
+            tensorboard_experiment_name=EXPERIMENT_NAME,
             logdir=AIP_TENSORBOARD_LOG_DIR,
         )
-
+    rank = int(os.environ.get("RANK", 0))
     model_kwargs = kwargs.get('model_kwargs')
     loader_kwargs = kwargs.get('loader_kwargs')
     trainer_kwargs = kwargs.get('trainer_kwargs')
@@ -62,32 +63,37 @@ def train_model(**kwargs):
     pretrained_filename = os.path.join(CHECKPOINT_PATH, "ViT.ckpt")
     if os.path.isfile(pretrained_filename):
         print("Found pretrained model at %s, loading..." % pretrained_filename)
-        # Automatically loads the model with the saved hyperparameters
-        model = ViT.load_from_checkpoint(pretrained_filename)
+        if rank == 0:
+            # Automatically loads the model with the saved hyperparameters
+            model = ViT.load_from_checkpoint(pretrained_filename)
     else:
         L.seed_everything(42)  # To be reproducable
         model = ViT(model_kwargs, lr)
         trainer.fit(model, train_loader, val_loader)
-        # Load best checkpoint after training
-        model = ViT.load_from_checkpoint(trainer.checkpoint_callback.best_model_path)
+        if rank == 0:
+            # Load best checkpoint after training
+            model = ViT.load_from_checkpoint(trainer.checkpoint_callback.best_model_path)
 
     # Test best model on validation and test set
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
     result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
-    print(result)
+    if rank == 0:
+        print(result)
 
-    # Save the trained model locally
-    # trainer.save_checkpoint(pretrained_filename)
-    model_filepath = os.path.join(CHECKPOINT_PATH, 'ViT.pt')
-    torch.save(model.model.state_dict(), model_filepath)
+    if rank == 0:
+        # Save the trained model locally
+        # trainer.save_checkpoint(pretrained_filename)
+        model_filepath = os.path.join(CHECKPOINT_PATH, 'ViT.pt')
+        torch.save(model.model.state_dict(), model_filepath)
 
     if not is_local:
-        # Upload the trained model to Cloud storage
-        storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model.pt')
-        blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
-        blob.upload_from_filename(model_filepath)
-        print(f"Saved model files in {storage_path}")
+        if rank == 0:
+            # Upload the trained model to Cloud storage
+            storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model.pt')
+            blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
+            blob.upload_from_filename(model_filepath)
+            print(f"Saved model files in {storage_path}")
 
         aiplatform.end_upload_tb_log()
 
