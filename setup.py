@@ -14,7 +14,8 @@ REQUIRED_PACKAGES = [
     'websocket-client',
     'python-json-logger',
     'tensorboard',
-    'tensorflow'
+    'tensorflow',
+    'typing-extensions'
 ]
 
 setup(

@@ -5,7 +5,8 @@ import torch.utils.data as data
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 import lightning as L
-from lightning.pytorch.plugins.environments import KubeflowEnvironment
+
+from .dist_evironment import KubeflowEnvironment
 
 
 def get_datasets(dataset_path):
