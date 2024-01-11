@@ -1,11 +1,12 @@
 import torch
-import torch.nn as nn
+import os
+import json
 import torch.utils.data as data
-import torchvision
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 import lightning as L
+
+from .dist_evironment import KubeflowEnvironment
 
 
 def get_datasets(dataset_path):
@@ -47,14 +48,35 @@ def get_loaders(dataset_path, batch_size, num_workers):
     return train_loader, val_loader, test_loader
 
 
-def get_trainer(default_root_dir, logger, accelerator, strategy, devices, max_epochs, callbacks):
-    return L.Trainer(
-        default_root_dir=default_root_dir,
-        logger=logger,
-        accelerator=accelerator,
-        strategy=strategy,
-        devices=devices,
-        max_epochs=max_epochs,
-        callbacks=callbacks,
-        enable_checkpointing=True,
-    )
+def get_trainer(default_root_dir, logger, accelerator, strategy, devices, num_nodes, max_epochs, callbacks):
+    if num_nodes > 1:
+        return L.Trainer(
+            default_root_dir=default_root_dir,
+            logger=logger,
+            accelerator=accelerator,
+            strategy=strategy,
+            devices=devices,
+            num_nodes=num_nodes,
+            max_epochs=max_epochs,
+            callbacks=callbacks,
+            enable_checkpointing=True,
+            plugins=KubeflowEnvironment(),
+        )
+    else:
+        return L.Trainer(
+            default_root_dir=default_root_dir,
+            logger=logger,
+            accelerator=accelerator,
+            strategy=strategy,
+            devices=devices,
+            num_nodes=num_nodes,
+            max_epochs=max_epochs,
+            callbacks=callbacks,
+            enable_checkpointing=True,
+        )
+
+
+def get_n_tpus():
+    tf_config_str = os.environ.get('TF_CONFIG')
+    tf_config_dict = json.loads(tf_config_str)
+    return int(tf_config_dict['job']['worker_config']['accelerator_config']['count'])

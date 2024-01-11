@@ -9,11 +9,16 @@ from torchvision.io import read_image
 import torchvision.transforms as T
 from ts.torch_handler.base_handler import BaseHandler
 
-from google.cloud import storage
+logger = logging.getLogger('__main__')
+
+try:
+    from google.cloud import storage
+except:
+    logger.warning('No GCS loaded, only local prediction available')
 
 from model import VisionTransformer
 
-logger = logging.getLogger('__main__')
+
 transforms = T.Resize(size=(32, 32))
 softmax = torch.nn.Softmax(dim=-1)
 
@@ -45,8 +50,12 @@ CLASS_MAPPING = {
                 9: 'truck'
 }
 
-client = storage.Client(project=PROJECT_ID)
-bucket = storage.Client().bucket(BUCKET_NAME)
+try:
+    client = storage.Client(project=PROJECT_ID)
+    bucket = storage.Client().bucket(BUCKET_NAME)
+except:
+    logger.warning('No GCS loaded, only local prediction available')
+
 
 def get_input(file):
     if isinstance(file, dict):
@@ -104,25 +113,23 @@ class TransformersClassifierHandler(BaseHandler):
         """ Preprocessing input request by tokenizing
             Extend with your own preprocessing steps as needed
         """
-        if isinstance(data, list):
-            path = data[0].get("data")
-            if path is None:
-                path = data[0].get("body")
-            if path is None:
-                root = data[0]
-            else:
-                root = path
-            file = root.get("file")
-            if file is None:
-                link = root.get("link")
-                if isinstance(link, str) and link.startswith('gs://'):
-                    sub_folder = os.path.relpath(link.replace('gs://', ''), BUCKET_NAME)
-                    blob = bucket.get_blob(sub_folder)    
-                    file = blob.download_as_bytes()
-                else:
-                    raise ValueError()
+        logger.info(data)
+        path = data[0].get("data")
+        if path is None:
+            path = data[0].get("body")
+        if path is None:
+            root = data[0]
         else:
-            file = data
+            root = path
+        file = root.get("file")
+        if file is None:
+            link = root.get("link")
+            if isinstance(link, str) and link.startswith('gs://'):
+                sub_folder = os.path.relpath(link.replace('gs://', ''), BUCKET_NAME)
+                blob = bucket.get_blob(sub_folder)
+                file = blob.download_as_bytes()
+            else:
+                raise ValueError()
         inputs = get_input(file)
         return inputs.type(torch.float32)
 

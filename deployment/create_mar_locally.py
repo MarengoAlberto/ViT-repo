@@ -1,27 +1,24 @@
 import logging
 import os
-import json
 import subprocess
 import time
-from collections import namedtuple
 from pathlib import Path
+from dotenv import load_dotenv
 
 logging.getLogger().setLevel(logging.INFO)
 
-MODEL_PT_FILEPATH = 'saved_models/VisionTransformers'
-MAR_MODEL_OUT_PATH = 'serve'
-MODEL_FILE_PATH = 'predictor'
-handler = 'predictor/handler.py'
-MODEL_DISPLAY_NAME = 'ViT-model'
-model_version = 1
-PROJECT_ID = 'alberto-playground'
-BUCKET_NAME = 'alberto-vit-playground'
-CUSTOM_PREDICTOR_IMAGE_URI = f"gcr.io/{PROJECT_ID}/pytorch_predict_vit"
+load_dotenv()
+
+MODEL_PT_FILEPATH = os.environ['MODEL_PT_FILEPATH']
+MAR_MODEL_OUT_PATH = os.environ['MAR_MODEL_OUT_PATH']
+MODEL_FILE_PATH = os.environ['MODEL_FILE_PATH']
+handler = os.environ['HANDLER']
+MODEL_DISPLAY_NAME = os.environ['MODEL_DISPLAY_NAME']
+model_version = os.environ['MODEL_VERSION']
 
 # create directory to save model archive file
 model_output_root = MODEL_PT_FILEPATH
 mar_output_root = MAR_MODEL_OUT_PATH
-additiona_files_base_dir = 'src/model'
 export_path = f"{mar_output_root}/model-store"
 try:
     Path(export_path).mkdir(parents=True, exist_ok=True)
