@@ -34,10 +34,10 @@ job = aiplatform.CustomPythonPackageTrainingJob(
 )
 
 # Training cluster worker pool configuration
-REPLICA_COUNT = 3
+REPLICA_COUNT = 2
 MACHINE_TYPE = "n1-standard-32"
 ACCELERATOR_TYPE = "NVIDIA_TESLA_P100"
-ACCELERATOR_COUNT = 2
+ACCELERATOR_COUNT = 4
 
 # Reduction Server configuration
 REDUCTION_SERVER_COUNT = 4
@@ -54,6 +54,6 @@ model = job.run(
     # reduction_server_machine_type=REDUCTION_SERVER_MACHINE_TYPE,
     # reduction_server_container_uri=REDUCTION_SERVER_IMAGE_URI,
     environment_variables=ENVIRONMENT_VARIABLES,
-    service_account=os.environ['SERVICE_ACCOUNT'],
+    service_account='alberto-sa@alberto-playground-395414.iam.gserviceaccount.com',
     sync=True,
 )

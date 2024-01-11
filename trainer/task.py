@@ -8,7 +8,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
 from .src.lightning_model import ViT
-from .src import utils
+from .src import utils, project_setup
 
 load_dotenv()
 
@@ -19,36 +19,23 @@ if not is_local:
 
 logger = logging.getLogger(__name__)
 
-PROJECT_ID = 'alberto-playground'
-REGION = 'us-central1'
-BUCKET_URI = 'alberto-vit-playground'
+PROJECT_ID = 'alberto-playground-395414'
+REGION = 'us-east1'
+BUCKET_URI = 'vit-bucket'
 DATASET_PATH = os.environ.get("PATH_DATASETS", "data/")
 CHECKPOINT_PATH = os.environ.get("PATH_CHECKPOINT", "saved_models/VisionTransformers/")
-STORAGE_BUCKET = 'gs://alberto-vit-playground/outputs'
-TENSORBOARD_NAME = 'tb-ViT'
-EXPERIMENT_NAME = 'vit-model-v0'
+STORAGE_BUCKET = 'gs://vit-bucket/outputs'
+TENSORBOARD_NAME = 'tbViT'
+EXPERIMENT_NAME = 'vitmodel'
 
-if not is_local:
-    AIP_TENSORBOARD_LOG_DIR = f"{STORAGE_BUCKET}/tb/{EXPERIMENT_NAME}"
-    storage_client = storage.Client()
-    aiplatform.init(project=PROJECT_ID, location=REGION, staging_bucket=BUCKET_URI)
-    tensorboard = aiplatform.Tensorboard.create(display_name=TENSORBOARD_NAME, project=PROJECT_ID, location=REGION)
-    TENSORBOARD_RESOURCE_NAME = tensorboard.gca_resource.name
-    print("TensorBoard resource name:", TENSORBOARD_RESOURCE_NAME)
-else:
-    AIP_TENSORBOARD_LOG_DIR = "tb_logs"
+for k, v in os.environ.items():
+    print(f'{k}={v}')
 
 
 def train_model(**kwargs):
+    rank = int(os.environ.get("GLOBAL_RANK", 0))
+    AIP_TENSORBOARD_LOG_DIR = project_setup.create_tensorboard(is_local)
     logger = TensorBoardLogger(AIP_TENSORBOARD_LOG_DIR, name=EXPERIMENT_NAME)
-    if not is_local:
-        # Continuous monitoring
-        aiplatform.start_upload_tb_log(
-            tensorboard_id=tensorboard.gca_resource.name.split('/')[-1],
-            tensorboard_experiment_name=EXPERIMENT_NAME,
-            logdir=AIP_TENSORBOARD_LOG_DIR,
-        )
-    rank = int(os.environ.get("RANK", 0))
     model_kwargs = kwargs.get('model_kwargs')
     loader_kwargs = kwargs.get('loader_kwargs')
     trainer_kwargs = kwargs.get('trainer_kwargs')
@@ -70,17 +57,14 @@ def train_model(**kwargs):
         L.seed_everything(42)  # To be reproducable
         model = ViT(model_kwargs, lr)
         trainer.fit(model, train_loader, val_loader)
-        if rank == 0:
-            # Load best checkpoint after training
-            model = ViT.load_from_checkpoint(trainer.checkpoint_callback.best_model_path)
+        # model = ViT.load_from_checkpoint(trainer.checkpoint_callback.best_model_path)
 
     # Test best model on validation and test set
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
     result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
-    if rank == 0:
-        print(result)
-
+    print(result)
+    
     if rank == 0:
         # Save the trained model locally
         # trainer.save_checkpoint(pretrained_filename)
@@ -91,7 +75,10 @@ def train_model(**kwargs):
         if rank == 0:
             # Upload the trained model to Cloud storage
             storage_path = os.path.join(STORAGE_BUCKET, 'ViT-model.pt')
-            blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(BUCKET_URI)
+            blob = bucket.blob('model/ViT-model.pt')
+            # blob = storage.blob.Blob.from_string(storage_path, client=storage_client)
             blob.upload_from_filename(model_filepath)
             print(f"Saved model files in {storage_path}")
 
@@ -102,7 +89,8 @@ if __name__=="__main__":
     isExist = os.path.exists(CHECKPOINT_PATH)
     if not isExist:
         os.makedirs(CHECKPOINT_PATH)
-    world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
+    # world_size = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
+    world_size = 2
     tpu = True if "XRT_TPU_CONFIG" in os.environ else False
     if tpu:
         accelerator = "tpu"
