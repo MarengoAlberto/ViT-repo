@@ -39,6 +39,8 @@ MACHINE_TYPE = os.environ.get('MACHINE_TYPE', "n1-standard-32")
 ACCELERATOR_TYPE = os.environ.get('ACCELERATOR_TYPE', "NVIDIA_TESLA_P100")
 ACCELERATOR_COUNT = os.environ.get('ACCELERATOR_COUNT', 4)
 
+SERVICE_ACCOUNT = os.environ['SERVICE_ACCOUNT']
+
 # Reduction Server configuration
 REDUCTION_SERVER_COUNT = os.environ.get("REDUCTION_SERVER_COUNT", 4)
 REDUCTION_SERVER_MACHINE_TYPE = os.environ.get("REDUCTION_SERVER_MACHINE_TYPE", "n1-highcpu-16")
@@ -55,6 +57,6 @@ model = job.run(
     # reduction_server_machine_type=REDUCTION_SERVER_MACHINE_TYPE,
     # reduction_server_container_uri=REDUCTION_SERVER_IMAGE_URI,
     environment_variables=ENVIRONMENT_VARIABLES,
-    service_account='alberto-sa@alberto-playground-395414.iam.gserviceaccount.com',
+    service_account=SERVICE_ACCOUNT,
     sync=True,
 )
