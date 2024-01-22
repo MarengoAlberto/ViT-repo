@@ -40,7 +40,6 @@ def get_arguments() -> RunnerArguments:
         strategy = "auto"
         num_workers = world_size * utils.get_n_tpus()
     else:
-        accelerator = "auto"
         num_cpus = cpu_count()
         num_gpus = torch.cuda.device_count()
         if torch.cuda.is_available():
@@ -49,6 +48,7 @@ def get_arguments() -> RunnerArguments:
             num_dataloader_workers = world_size * num_gpus
             strategy = "ddp"
         else:
+            accelerator = "auto"
             num_dataloader_workers = num_cpus
             num_workers = num_cpus
             strategy = "auto"

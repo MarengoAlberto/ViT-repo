@@ -35,14 +35,15 @@ job = aiplatform.CustomPythonPackageTrainingJob(
 
 # Training cluster worker pool configuration
 REPLICA_COUNT = os.environ['NUM_NODES']
-MACHINE_TYPE = "n1-standard-32"
-ACCELERATOR_TYPE = "NVIDIA_TESLA_P100"
-ACCELERATOR_COUNT = 4
+MACHINE_TYPE = os.environ.get('MACHINE_TYPE', "n1-standard-32")
+ACCELERATOR_TYPE = os.environ.get('ACCELERATOR_TYPE', "NVIDIA_TESLA_P100")
+ACCELERATOR_COUNT = os.environ.get('ACCELERATOR_COUNT', 4)
 
 # Reduction Server configuration
-REDUCTION_SERVER_COUNT = 4
-REDUCTION_SERVER_MACHINE_TYPE = "n1-highcpu-16"
-REDUCTION_SERVER_IMAGE_URI = "us-docker.pkg.dev/vertex-ai-restricted/training/reductionserver:latest"
+REDUCTION_SERVER_COUNT = os.environ.get("REDUCTION_SERVER_COUNT", 4)
+REDUCTION_SERVER_MACHINE_TYPE = os.environ.get("REDUCTION_SERVER_MACHINE_TYPE", "n1-highcpu-16")
+REDUCTION_SERVER_IMAGE_URI = os.environ.get("REDUCTION_SERVER_IMAGE_URI",
+                                            "us-docker.pkg.dev/vertex-ai-restricted/training/reductionserver:latest")
 ENVIRONMENT_VARIABLES = {"NCCL_DEBUG": "INFO"}
 
 model = job.run(

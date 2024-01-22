@@ -39,7 +39,7 @@ trainer_kwargs = {
 
 runner_kwargs = {
         "rank": os.environ.get("GLOBAL_RANK", 0),
-        "is_local": True if "GOOGLE__" not in os.environ else False,
+        "is_local": True if "GOOGLE_VM_CONFIG_LOCK_FILE" not in os.environ else False,
         "lr": os.environ.get("LR", 3e-4),
         "model_name": os.environ.get("MODEL_NAME", 'ViT-model'),
         "experiment_name": os.environ.get("EXPERIMENT_NAME", 'vitmodel'),
