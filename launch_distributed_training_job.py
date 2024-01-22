@@ -34,7 +34,7 @@ job = aiplatform.CustomPythonPackageTrainingJob(
 )
 
 # Training cluster worker pool configuration
-REPLICA_COUNT = 2
+REPLICA_COUNT = os.environ['NUM_NODES']
 MACHINE_TYPE = "n1-standard-32"
 ACCELERATOR_TYPE = "NVIDIA_TESLA_P100"
 ACCELERATOR_COUNT = 4

@@ -1,14 +1,43 @@
 from dataclasses import dataclass
+from typing import List
+from lightning.pytorch.callbacks import ModelCheckpoint
+
+
+@dataclass
+class ModelArguments:
+    embed_dim: int
+    hidden_dim: int
+    num_heads: int
+    num_layers: int
+    patch_size: int
+    num_channels: int
+    num_patches: int
+    num_classes: int
+    dropout: float
+
+
+@dataclass
+class LoaderArguments:
+    dataset_path: str
+    batch_size: int
+    num_workers: int = None
+
+
+@dataclass
+class TrainerArguments:
+    default_root_dir: str
+    num_nodes: int
+    max_epochs: int
+    callbacks: List[ModelCheckpoint]
+    accelerator: str = None
+    strategy: str = None
+    devices: int = None
 
 
 @dataclass
 class RunnerArguments:
-    n_clusters: int
     rank: int
     is_local: bool
-    model_kwargs: dict
-    loader_kwargs: dict
-    trainer_kwargs: dict
     lr: float
     model_name: str
     experiment_name:str
@@ -17,18 +46,6 @@ class RunnerArguments:
     project_id: str
     region: str
     tensorboard_name: str
-
-
-@dataclass
-class ModelArguments:
-    pass
-
-
-@dataclass
-class LoaderArguments:
-    pass
-
-
-@dataclass
-class TrainerArguments:
-    pass
+    model_kwargs: ModelArguments = None
+    loader_kwargs: LoaderArguments = None
+    trainer_kwargs: TrainerArguments = None

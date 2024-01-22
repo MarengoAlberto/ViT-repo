@@ -18,8 +18,8 @@ class Runner:
         aip_tensorboard_log_dir = project_setup.create_tensorboard(self.args)
         logger = TensorBoardLogger(aip_tensorboard_log_dir, name=self.args.experiment_name)
         self.args.trainer_kwargs['logger'] = logger
-        train_loader, val_loader, test_loader = utils.get_loaders(**self.args.loader_kwargs)
-        trainer = utils.get_trainer(**self.args.trainer_kwargs)
+        train_loader, val_loader, test_loader = utils.get_loaders(self.args.loader_kwargs)
+        trainer = utils.get_trainer(self.args.trainer_kwargs)
         trainer.logger._log_graph = True  # If True, we plot the computation graph in tensorboard
         trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
         # Check whether pretrained model exists. If yes, load it and skip training
