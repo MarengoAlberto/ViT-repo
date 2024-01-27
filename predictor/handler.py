@@ -1,76 +1,20 @@
 import os
 import logging
-import base64
-from io import BytesIO
-from PIL import Image
-import json
 import torch
-from torchvision.io import read_image
-import torchvision.transforms as T
 from ts.torch_handler.base_handler import BaseHandler
+from model import VisionTransformer
+from utils import softmax, get_input
+from utils import PROJECT_ID, BUCKET_NAME, CLASS_MAPPING, model_kwargs
 
 logger = logging.getLogger('__main__')
 
+
 try:
     from google.cloud import storage
-except:
-    logger.warning('No GCS loaded, only local prediction available')
-
-from model import VisionTransformer
-
-
-transforms = T.Resize(size=(32, 32))
-softmax = torch.nn.Softmax(dim=-1)
-
-PROJECT_ID = 'alberto-playground'
-BUCKET_NAME = 'alberto-vit-playground'
-TEMP_FILE_NAME = '/tmp/image.png'
-model_kwargs={
-            "embed_dim": 256,
-            "hidden_dim": 512,
-            "num_heads": 8,
-            "num_layers": 6,
-            "patch_size": 4,
-            "num_channels": 3,
-            "num_patches": 64,
-            "num_classes": 10,
-            "dropout": 0.2,
-        }
-
-CLASS_MAPPING = {
-                0: 'airplane',
-                1: 'automobile',
-                2: 'bird',
-                3: 'cat',
-                4: 'deer',
-                5: 'dog',
-                6: 'frog',
-                7: 'horse',
-                8: 'ship',
-                9: 'truck'
-}
-
-try:
     client = storage.Client(project=PROJECT_ID)
     bucket = storage.Client().bucket(BUCKET_NAME)
 except:
     logger.warning('No GCS loaded, only local prediction available')
-
-
-def get_input(file):
-    if isinstance(file, dict):
-        logger.info(file.keys())
-        im = Image.open(BytesIO(base64.b64decode(file['content'])))
-        im.save(TEMP_FILE_NAME)
-    else:
-        image = Image.open(BytesIO(file))
-        image.save(TEMP_FILE_NAME)
-    input = read_image(TEMP_FILE_NAME)
-    input = transforms(input)
-    input= torch.unsqueeze(input, 0)
-    logger.info(f"Tensor shape: {input.shape}")
-    os.remove(TEMP_FILE_NAME)
-    return input
 
 
 class TransformersClassifierHandler(BaseHandler):

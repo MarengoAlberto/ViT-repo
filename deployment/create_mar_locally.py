@@ -35,7 +35,8 @@ handler_path = (
     else handler
 )
 model_artifacts_dir = model_output_root
-extra_files = [f'{MODEL_FILE_PATH}/modules.py']
+extra_files = [f'{MODEL_FILE_PATH}/modules.py',
+               f'{MODEL_FILE_PATH}/utils.py']
 
 # define model archive config
 mar_config = {
