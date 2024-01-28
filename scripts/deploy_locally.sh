@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source .env
 rm -rf serve
 python deployment/create_mar_locally.py
-torchserve --start --model-store serve/model-store --models ViT-model.mar
+torchserve --start --model-store serve/model-store --models $MODEL_DISPLAY_NAME.mar

@@ -8,7 +8,6 @@ from utils import PROJECT_ID, REGION, BUCKET_NAME, CLASS_MAPPING, model_kwargs
 
 logger = logging.getLogger('__main__')
 
-
 try:
     from google.cloud import aiplatform
     from google.cloud import storage

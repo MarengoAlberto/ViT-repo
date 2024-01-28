@@ -38,9 +38,11 @@ handler_path = (
     if handler.startswith("gs://")
     else handler
 )
+map_classes_path = os.getenv('MAP_CLASSES_PATH')
 model_artifacts_dir = model_output_root
 extra_files = [f'{MODEL_FILE_PATH}/modules.py',
-               f'{MODEL_FILE_PATH}/utils.py']
+               f'{MODEL_FILE_PATH}/utils.py',
+               map_classes_path]
 
 serialized_file_path = f'{model_artifacts_dir}/{MODEL_NAME}.pt'
 if not os.path.isfile(serialized_file_path):
