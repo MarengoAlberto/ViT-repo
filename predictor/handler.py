@@ -4,13 +4,15 @@ import torch
 from ts.torch_handler.base_handler import BaseHandler
 from model import VisionTransformer
 from utils import softmax, get_input
-from utils import PROJECT_ID, BUCKET_NAME, CLASS_MAPPING, model_kwargs
+from utils import PROJECT_ID, REGION, BUCKET_NAME, CLASS_MAPPING, model_kwargs
 
 logger = logging.getLogger('__main__')
 
 
 try:
+    from google.cloud import aiplatform
     from google.cloud import storage
+    aiplatform.init(project=PROJECT_ID, location=REGION)
     client = storage.Client(project=PROJECT_ID)
     bucket = storage.Client().bucket(BUCKET_NAME)
 except:

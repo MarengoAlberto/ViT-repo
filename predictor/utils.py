@@ -18,6 +18,7 @@ logger = logging.getLogger('__main__')
 
 
 PROJECT_ID = os.getenv('PROJECT_ID')
+REGION = os.getenv('REGION')
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 model_kwargs = {
                 "embed_dim": os.getenv('EMBED_DIM'),
