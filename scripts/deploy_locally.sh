@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -a
 source .env
 rm -rf serve
 python deployment/create_mar_locally.py

@@ -1,3 +1,6 @@
+#!/bin/bash
+
+set -a
 source .env
 docker build -f tpu/Dockerfile -t $CUSTOM_TPU_TRAINING_IMAGE_URI ./
 docker push $CUSTOM_TPU_TRAINING_IMAGE_URI
