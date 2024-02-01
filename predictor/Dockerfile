@@ -15,14 +15,68 @@ RUN python3 -m pip install google-cloud-storage
 
 # COPY src /home/model-server/src
 COPY serve/model-store/ViT-model.mar /home/model-server/model-store/
-COPY token/alberto-playground-bc631f2fcabd.json /home/model-server/
+#COPY token/alberto-playground-bc631f2fcabd.json /home/model-server/
 
-ENV GOOGLE_APPLICATION_CREDENTIALS=/home/model-server/alberto-playground-bc631f2fcabd.json
+#ENV GOOGLE_APPLICATION_CREDENTIALS=/home/model-server/alberto-playground-bc631f2fcabd.json
 
-ARG MODEL_NAME=ViT-model
+# Accept the environment variable
+ARG MODEL_NAME
+# Set the environment variable
 ENV MODEL_NAME="${MODEL_NAME}"
+# Accept the environment variable
+ARG PROJECT_ID
+# Set the environment variable
+ENV PROJECT_ID=${PROJECT_ID}
+# Accept the environment variable
+ARG REGION
+# Set the environment variable
+ENV REGION=${REGION}
+# Accept the environment variable
+ARG BUCKET_NAME
+# Set the environment variable
+ENV BUCKET_NAME=${BUCKET_NAME}
+# Accept the environment variable
+ARG EMBED_DIM
+# Set the environment variable
+ENV EMBED_DIM=${EMBED_DIM}
+# Accept the environment variable
+ARG HIDDEN_DIM
+# Set the environment variable
+ENV HIDDEN_DIM=${HIDDEN_DIM}
+# Accept the environment variable
+ARG NUM_HEADS
+# Set the environment variable
+ENV NUM_HEADS=${NUM_HEADS}
+# Accept the environment variable
+ARG NUM_LAYERS
+# Set the environment variable
+ENV NUM_LAYERS=${NUM_LAYERS}
+# Accept the environment variable
+ARG PATCH_SIZE
+# Set the environment variable
+ENV PATCH_SIZE=${PATCH_SIZE}
+# Accept the environment variable
+ARG NUM_CHANNELS
+# Set the environment variable
+ENV NUM_CHANNELS=${NUM_CHANNELS}
+# Accept the environment variable
+ARG NUM_PATCHES
+# Set the environment variable
+ENV NUM_PATCHES=${NUM_PATCHES}
+# Accept the environment variable
+ARG NUM_CLASSES
+# Set the environment variable
+ENV NUM_CLASSES=${NUM_CLASSES}
+# Accept the environment variable
+ARG DROPOUT
+# Set the environment variable
+ENV DROPOUT=${DROPOUT}
+# Accept the environment variable
+ARG MAP_CLASSES_PATH
+# Set the environment variable
+ENV MAP_CLASSES_PATH=${MAP_CLASSES_PATH}
 
-ARG MAR_URI=gs://alberto-playground/serve
+ARG MAR_URI=gs://${PROJECT_ID}/serve
 ENV MAR_URI="${AIP_STORAGE_URI}"
 
 # health and prediction listener ports

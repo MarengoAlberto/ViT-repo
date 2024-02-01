@@ -42,6 +42,7 @@ with open(map_class_path, 'r') as fp:
 # Makes sure keys are integer
 CLASS_MAPPING = keystoint(CLASS_MAPPING)
 
+
 def get_input(file):
     if isinstance(file, dict):
         logger.info(file.keys())
