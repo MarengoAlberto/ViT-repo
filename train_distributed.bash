@@ -1,3 +1,6 @@
+#!/bin/bash
+
+set -a
 source .env
 python setup.py sdist --formats=gztar
 gsutil cp $SOURCE_PACKAGE_FILE_NAME $PYTHON_PACKAGE_GCS_URI

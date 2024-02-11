@@ -45,7 +45,7 @@ SERVICE_ACCOUNT = os.environ['SERVICE_ACCOUNT']
 REDUCTION_SERVER_COUNT = os.environ.get("REDUCTION_SERVER_COUNT", 4)
 REDUCTION_SERVER_MACHINE_TYPE = os.environ.get("REDUCTION_SERVER_MACHINE_TYPE", "n1-highcpu-16")
 REDUCTION_SERVER_IMAGE_URI = os.environ.get("REDUCTION_SERVER_IMAGE_URI",
-                                            "us-docker.pkg.dev/vertex-ai-restricted/training/reductionserver:latest")
+                                            "us-docker.pkg.environments/vertex-ai-restricted/training/reductionserver:latest")
 ENVIRONMENT_VARIABLES = {"NCCL_DEBUG": "INFO"}
 
 model = job.run(
