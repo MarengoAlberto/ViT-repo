@@ -12,3 +12,12 @@ push:
 
 deploy:
 				scripts/deploy.sh
+
+train:
+				python -m trainer.task
+
+train-distributed:
+				scripts/train_distributed.sh
+
+train-tpu:
+				scripts/train_tpu.sh
