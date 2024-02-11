@@ -16,7 +16,6 @@ MODEL_PT_FILEPATH = os.environ['MODEL_PT_FILEPATH']
 MAR_MODEL_OUT_PATH = os.environ['MAR_MODEL_OUT_PATH']
 MODEL_FILE_PATH = os.environ['MODEL_FILE_PATH']
 handler = os.environ['HANDLER']
-MODEL_DISPLAY_NAME = os.environ['MODEL_DISPLAY_NAME']
 MODEL_NAME = os.environ['MODEL_NAME']
 model_version = os.environ['MODEL_VERSION']
 
@@ -61,7 +60,7 @@ if not os.path.isfile(serialized_file_path):
 
 # define model archive config
 mar_config = {
-    "MODEL_NAME": MODEL_DISPLAY_NAME,
+    "MODEL_NAME": MODEL_NAME,
     "HANDLER": handler_path,
     "SERIALIZED_FILE": serialized_file_path,
     "MODEL_FILE": f'{MODEL_FILE_PATH}/model.py',

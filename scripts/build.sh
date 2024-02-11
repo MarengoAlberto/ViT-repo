@@ -1,11 +1,32 @@
 #!/bin/bash
 
+# Prep mar file
 set -a
 source .env
 rm -rf serve
 python deployment/create_mar_locally.py
 gsutil cp serve/model-store/ViT-model.mar gs://$BUCKET_NAME/$MAR_MODEL_OUT_PATH/$MODEL_DISPLAY_NAME.mar
-docker build -f predictor/Dockerfile -t $CUSTOM_PREDICTOR_IMAGE_URI \
+
+# Check if the service name is set
+if [ -z "${MODEL_NAME}" ]; then
+    echo "Error: Environment variable MODEL_NAME is not set."
+    exit 1
+fi
+
+# Get the current git commit SHA
+COMMIT_SHA=$(git rev-parse --short HEAD)
+
+# Check if git rev-parse was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Unable to get the current commit SHA."
+    exit 1
+fi
+
+# Combine the service name with the commit SHA for the image tag
+IMAGE_TAG="${MODEL_NAME}:${COMMIT_SHA}"
+
+# Build the Docker image
+docker build -f predictor/Dockerfile -t "${IMAGE_TAG}" \
                                       --build-arg MODEL_NAME=${MODEL_NAME} \
                                       --build-arg PROJECT_ID=${PROJECT_ID} \
                                       --build-arg REGION=${REGION} \
@@ -21,5 +42,10 @@ docker build -f predictor/Dockerfile -t $CUSTOM_PREDICTOR_IMAGE_URI \
                                       --build-arg DROPOUT=${DROPOUT} \
                                       --build-arg MAP_CLASSES_PATH=${MAP_CLASSES_PATH} \
                                       .
-docker push $CUSTOM_PREDICTOR_IMAGE_URI
-python deployment/deploy_gcp.py
+# Check if docker build was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Docker build failed."
+    exit 1
+fi
+
+echo "Docker image built successfully: $IMAGE_TAG"

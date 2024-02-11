@@ -8,14 +8,16 @@ from utils import PROJECT_ID, REGION, BUCKET_NAME, CLASS_MAPPING, model_kwargs
 
 logger = logging.getLogger('__main__')
 
-try:
-    from google.cloud import aiplatform
-    from google.cloud import storage
-    aiplatform.init(project=PROJECT_ID, location=REGION)
-    client = storage.Client(project=PROJECT_ID)
-    bucket = storage.Client().bucket(BUCKET_NAME)
-except:
-    logger.warning('No GCS loaded, only local prediction available')
+logger.info(f"Working on project_id: {PROJECT_ID}")
+
+# try:
+from google.cloud import aiplatform
+from google.cloud import storage
+aiplatform.init(project=PROJECT_ID, location=REGION)
+client = storage.Client(project=PROJECT_ID)
+bucket = storage.Client().bucket(BUCKET_NAME)
+# except:
+#     logger.warning('No GCS loaded, only local prediction available')
 
 
 class TransformersClassifierHandler(BaseHandler):

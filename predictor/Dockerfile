@@ -11,18 +11,20 @@ USER model-server
 
 # install dependencies
 RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install google-cloud-aiplatform
 RUN python3 -m pip install google-cloud-storage
-
-# COPY src /home/model-server/src
-COPY serve/model-store/ViT-model.mar /home/model-server/model-store/
-#COPY token/alberto-playground-bc631f2fcabd.json /home/model-server/
-
-#ENV GOOGLE_APPLICATION_CREDENTIALS=/home/model-server/alberto-playground-bc631f2fcabd.json
 
 # Accept the environment variable
 ARG MODEL_NAME
 # Set the environment variable
 ENV MODEL_NAME="${MODEL_NAME}"
+
+# COPY src /home/model-server/src
+COPY serve/model-store/$MODEL_NAME.mar /home/model-server/model-store/
+#COPY token/alberto-playground-bc631f2fcabd.json /home/model-server/
+
+#ENV GOOGLE_APPLICATION_CREDENTIALS=/home/model-server/alberto-playground-bc631f2fcabd.json
+
 # Accept the environment variable
 ARG PROJECT_ID
 # Set the environment variable
