@@ -1,5 +1,5 @@
-from src.runner import Runner
-from src.project_setup import get_arguments
+from .src.runner import Runner
+from .src.project_setup import get_arguments
 
 args = get_arguments()
 print(args)
