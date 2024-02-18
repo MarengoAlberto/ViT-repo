@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from lightning.pytorch.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import TensorBoardLogger
 
 
 @dataclass
@@ -32,6 +33,7 @@ class TrainerArguments:
     accelerator: str = None
     strategy: str = None
     devices: int = None
+    logger: TensorBoardLogger = None
 
 
 @dataclass

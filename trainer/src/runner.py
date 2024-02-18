@@ -17,7 +17,7 @@ class Runner:
     def train_model(self):
         aip_tensorboard_log_dir = project_setup.create_tensorboard(self.args)
         logger = TensorBoardLogger(aip_tensorboard_log_dir, name=self.args.experiment_name)
-        self.args.trainer_kwargs['logger'] = logger
+        self.args.trainer_kwargs.logger = logger
         train_loader, val_loader, test_loader = utils.get_loaders(self.args.loader_kwargs)
         trainer = utils.get_trainer(self.args.trainer_kwargs)
         trainer.logger._log_graph = True  # If True, we plot the computation graph in tensorboard
