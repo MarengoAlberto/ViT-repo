@@ -18,7 +18,7 @@ model_kwargs = {
             "num_channels": int(os.environ.get("NUM_CHANNELS", 3)),
             "num_patches": int(os.environ.get("NUM_PATCHES", 64)),
             "num_classes": int(os.environ.get("NUM_CLASSES", 10)),
-            "dropout": int(os.environ.get("DROPOUT", 0.2))
+            "dropout": float(os.environ.get("DROPOUT", 0.2))
         }
 
 loader_kwargs = {
