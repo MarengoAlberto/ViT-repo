@@ -1,4 +1,4 @@
-torch>=1.8.1, <1.14.0
+torch>=1.8.1, <=1.13.0
 lightning>=2.0.0rc0
 setuptools==67.4.0
 seaborn
@@ -14,3 +14,4 @@ google-cloud-aiplatform[tensorboard]
 torchserve
 torch-model-archiver
 typing-extensions
+python-json-logger

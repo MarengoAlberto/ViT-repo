@@ -4,18 +4,7 @@ from .modules import AttentionBlock, img_to_patch
 
 
 class VisionTransformer(nn.Module):
-    def __init__(
-        self,
-        embed_dim,
-        hidden_dim,
-        num_channels,
-        num_heads,
-        num_layers,
-        num_classes,
-        patch_size,
-        num_patches,
-        dropout=0.0,
-    ):
+    def __init__(self, args):
         """
         Inputs:
             embed_dim - Dimensionality of the input feature vectors to the Transformer
@@ -30,6 +19,15 @@ class VisionTransformer(nn.Module):
             dropout - Amount of dropout to apply in the feed-forward network and
                       on the input encoding
         """
+        embed_dim = args.embed_dim
+        hidden_dim = args.hidden_dim
+        num_channels = args.num_channels
+        num_heads = args.num_heads
+        num_layers = args.num_layers
+        num_classes = args.num_classes
+        patch_size = args.patch_size
+        num_patches = args.num_patches
+        dropout = args.dropout
         super().__init__()
 
         self.patch_size = patch_size

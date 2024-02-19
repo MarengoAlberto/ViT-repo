@@ -38,40 +38,40 @@ def get_datasets(dataset_path):
     return train_set, val_set, test_set
 
 
-def get_loaders(dataset_path, batch_size, num_workers):
-    train_set, val_set, test_set = get_datasets(dataset_path)
+def get_loaders(args):
+    train_set, val_set, test_set = get_datasets(args.dataset_path)
     # We define a set of data loaders that we can use for various purposes later.
-    train_loader = data.DataLoader(train_set, batch_size=batch_size, drop_last=True,
-                                   pin_memory=True, num_workers=num_workers)
-    val_loader = data.DataLoader(val_set, batch_size=batch_size, drop_last=False, num_workers=num_workers)
-    test_loader = data.DataLoader(test_set, batch_size=batch_size, drop_last=False, num_workers=num_workers)
+    train_loader = data.DataLoader(train_set, batch_size=args.batch_size, drop_last=True,
+                                   pin_memory=True, num_workers=args.num_workers)
+    val_loader = data.DataLoader(val_set, batch_size=args.batch_size, drop_last=False, num_workers=args.num_workers)
+    test_loader = data.DataLoader(test_set, batch_size=args.batch_size, drop_last=False, num_workers=args.num_workers)
     return train_loader, val_loader, test_loader
 
 
-def get_trainer(default_root_dir, logger, accelerator, strategy, devices, num_nodes, max_epochs, callbacks):
-    if num_nodes > 1:
+def get_trainer(args):
+    if args.num_nodes > 1:
         return L.Trainer(
-            default_root_dir=default_root_dir,
-            logger=logger,
-            accelerator=accelerator,
-            strategy=strategy,
-            devices=devices,
-            num_nodes=num_nodes,
-            max_epochs=max_epochs,
-            callbacks=callbacks,
+            default_root_dir=args.default_root_dir,
+            logger=args.logger,
+            accelerator=args.accelerator,
+            strategy=args.strategy,
+            devices=args.devices,
+            num_nodes=args.num_nodes,
+            max_epochs=args.max_epochs,
+            callbacks=args.callbacks,
             enable_checkpointing=True,
             plugins=KubeflowEnvironment(),
         )
     else:
         return L.Trainer(
-            default_root_dir=default_root_dir,
-            logger=logger,
-            accelerator=accelerator,
-            strategy=strategy,
-            devices=devices,
-            num_nodes=num_nodes,
-            max_epochs=max_epochs,
-            callbacks=callbacks,
+            default_root_dir=args.default_root_dir,
+            logger=args.logger,
+            accelerator=args.accelerator,
+            strategy=args.strategy,
+            devices=args.devices,
+            num_nodes=args.num_nodes,
+            max_epochs=args.max_epochs,
+            callbacks=args.callbacks,
             enable_checkpointing=True,
         )
 

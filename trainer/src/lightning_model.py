@@ -9,14 +9,15 @@ class ViT(L.LightningModule):
     def __init__(self, model_kwargs, lr):
         super().__init__()
         self.save_hyperparameters()
-        self.model = VisionTransformer(**model_kwargs)
+        self.model = VisionTransformer(model_kwargs)
+        self.lr = lr
         # self.example_input_array = next(iter(train_loader))[0]
 
     def forward(self, x):
         return self.model(x)
 
     def configure_optimizers(self):
-        optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
+        optimizer = optim.AdamW(self.model.parameters(), lr=self.lr)
         lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100, 150], gamma=0.1)
         return [optimizer], [lr_scheduler]
 

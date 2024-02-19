@@ -4,7 +4,6 @@ from setuptools import setup
 REQUIRED_PACKAGES = [
     'tensorflow==2.13.0',
     'tensorboard',
-    'torch>=1.8.1, <1.14.0',
     'lightning>=2.0.0rc0',
     'setuptools==67.4.0',
     'torchmetrics>=0.7, <0.12',
@@ -18,7 +17,6 @@ REQUIRED_PACKAGES = [
     'python-dotenv',
     'websocket-client',
     'python-json-logger'
-    
 ]
 
 setup(
