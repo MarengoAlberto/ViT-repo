@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def create_tensorboard(args: RunnerArguments) -> str:
     if args.is_local:
         return "tb_logs"
-    tensorboard_log_dir = f'gs://{args.experiment_name}/{args.experiment_name}'
+    tensorboard_log_dir = f'gs://{args.bucket_name}/{args.experiment_name}'
     tensorboard = aiplatform.Tensorboard.create(display_name=args.tensorboard_name,
                                                 project=args.project_id, location=args.region)
     aiplatform.init(location=args.region, project=args.project_id, experiment_tensorboard=tensorboard)
