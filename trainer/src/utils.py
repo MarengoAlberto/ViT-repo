@@ -42,15 +42,9 @@ def get_loaders(args):
     train_set, val_set, test_set = get_datasets(args.dataset_path)
     # We define a set of data loaders that we can use for various purposes later.
     train_loader = data.DataLoader(train_set, batch_size=args.batch_size, drop_last=True,
-                                   pin_memory=True
-                                   # , num_workers=args.num_workers
-                                   )
-    val_loader = data.DataLoader(val_set, batch_size=args.batch_size, drop_last=False
-                                 # , num_workers=args.num_workers
-                                 )
-    test_loader = data.DataLoader(test_set, batch_size=args.batch_size, drop_last=False
-                                  # , num_workers=args.num_workers
-                                  )
+                                   pin_memory=True, num_workers=args.num_workers)
+    val_loader = data.DataLoader(val_set, batch_size=args.batch_size, drop_last=False, num_workers=args.num_workers)
+    test_loader = data.DataLoader(test_set, batch_size=args.batch_size, drop_last=False, num_workers=args.num_workers)
     return train_loader, val_loader, test_loader
 
 

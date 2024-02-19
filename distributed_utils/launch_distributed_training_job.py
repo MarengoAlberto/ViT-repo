@@ -1,11 +1,10 @@
 import logging
 import os
-from dotenv import load_dotenv
+from dotenv.main import dotenv_values
 
 from google.cloud import aiplatform
 
 logging.getLogger().setLevel(logging.INFO)
-load_dotenv()
 
 PROJECT_ID = os.environ['PROJECT_ID']
 REGION = os.environ['REGION']
@@ -46,7 +45,9 @@ REDUCTION_SERVER_COUNT = int(os.environ.get("REDUCTION_SERVER_COUNT", 4))
 REDUCTION_SERVER_MACHINE_TYPE = os.environ.get("REDUCTION_SERVER_MACHINE_TYPE", "n1-highcpu-16")
 REDUCTION_SERVER_IMAGE_URI = os.environ.get("REDUCTION_SERVER_IMAGE_URI",
                                             "us-docker.pkg.environments/vertex-ai-restricted/training/reductionserver:latest")
-ENVIRONMENT_VARIABLES = {"NCCL_DEBUG": "INFO"}
+
+ENVIRONMENT_VARIABLES = dict(dotenv_values('environments/.env'))
+ENVIRONMENT_VARIABLES["NCCL_DEBUG"] = "INFO"
 
 model = job.run(
     replica_count=REPLICA_COUNT,
