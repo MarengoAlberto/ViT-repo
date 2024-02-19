@@ -2,6 +2,6 @@
 
 # Load ENV variables
 set -a
-source .env
+source environments/.env
 
 python deployment/deploy_gcp.py

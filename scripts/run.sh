@@ -2,7 +2,7 @@
 
 # Load ENV variables
 set -a
-source .env
+source environments/.env
 
 # Check if the service name is set
 if [ -z "${MODEL_NAME}" ]; then
