@@ -15,6 +15,7 @@ class Runner:
         self.args = runner_arguments
 
     def train_model(self):
+        print(self.args)
         aip_tensorboard_log_dir = project_setup.create_tensorboard(self.args)
         logger = TensorBoardLogger(aip_tensorboard_log_dir, name=self.args.experiment_name)
         self.args.trainer_kwargs.logger = logger
@@ -37,6 +38,7 @@ class Runner:
         val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
         test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
         result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
+        print(self.args)
         if self.args.rank == 0:
             model_filepath = os.path.join(self.args.checkpoint_path, f'{self.args.model_name}.pt')
             torch.save(model.model.state_dict(), model_filepath)
